@@ -7,6 +7,8 @@
 
 #import <React/RCTConvert.h>
 #import <React/RCTUtils.h>
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <UserNotifications/UserNotifications.h>
 
 @interface RCTConvert (NSCalendarUnit)

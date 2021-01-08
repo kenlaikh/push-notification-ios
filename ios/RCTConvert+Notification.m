@@ -114,6 +114,26 @@ RCT_ENUM_CONVERTER(UIBackgroundFetchResult, (@{
     if (!isSilent) {
       content.sound = [RCTConvert NSString:details[@"sound"]] ? [UNNotificationSound soundNamed:[RCTConvert NSString:details[@"sound"]]] : [UNNotificationSound defaultSound];
     }
+  
+    if ([RCTConvert NSString:details[@"image"]]) {
+      UIImage *image = [UIImage imageNamed:[RCTConvert NSString:details[@"image"]]];
+      NSFileManager *fileManager = [NSFileManager defaultManager];
+      NSString *tmpSubFolderName = [[NSProcessInfo processInfo] globallyUniqueString];
+      NSURL *tmpSubFolderURL = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:tmpSubFolderName isDirectory:YES];
+      if ([fileManager createDirectoryAtURL:tmpSubFolderURL withIntermediateDirectories:YES attributes:nil error:NULL]) {
+        NSString *imageFileIdentifier = [[RCTConvert NSString:details[@"image"]] stringByAppendingString:@".png"];
+        NSURL *fileURL = [tmpSubFolderURL URLByAppendingPathComponent:imageFileIdentifier];
+        NSData *imageData = UIImagePNGRepresentation(image);
+        if (imageData != nil) {
+          if ([imageData writeToURL:fileURL options:NSDataWritingAtomic error:NULL]) {
+            UNNotificationAttachment *imageAttachment = [UNNotificationAttachment attachmentWithIdentifier:imageFileIdentifier URL:fileURL options:nil error:NULL];
+            if (imageAttachment != nil) {
+              content.attachments = [NSArray arrayWithObject:imageAttachment];
+            }
+          }
+        }
+      }
+    }
 
     NSDate* fireDate = [RCTConvert NSDate:details[@"fireDate"]];
     BOOL repeats = [RCTConvert BOOL:details[@"repeats"]];
